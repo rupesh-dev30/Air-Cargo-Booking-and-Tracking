@@ -1,17 +1,19 @@
-import { IsString, IsNumber, Min } from 'class-validator';
+import { IsInt, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateBookingDto {
-  @IsString()
-  origin: string;
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  flight_id: number;
 
-  @IsString()
-  destination: string;
-
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
   @Min(1)
   pieces: number;
 
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
   @Min(1)
   weight_kg: number;
 }

@@ -22,7 +22,7 @@ export class BookingEvent {
   @Column({ nullable: true })
   location: string;
 
-  @ManyToOne(() => Flight, { nullable: true })
+  @ManyToOne(() => Flight, { eager: true, nullable: true })
   flight: Flight;
 
   @CreateDateColumn()
