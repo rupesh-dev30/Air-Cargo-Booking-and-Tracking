@@ -99,8 +99,8 @@ Follow these steps to set up the project and run the API and UI locally.
 1.  **Clone the repository:**
 
     ```bash
-    git clone [repository_url]
-    cd air-cargo-booking-tracking
+    git clone https://github.com/rupesh-dev30/Air-Cargo-Booking-and-Tracking.git
+    cd air-cargo-booking-and-tracking
     ```
 
 2.  **Install dependencies:**
@@ -108,6 +108,12 @@ Follow these steps to set up the project and run the API and UI locally.
     ```bash
     npm install
     ```
+
+3.  **Using Turbo Repo:**
+
+    ```bash
+    turbo run dev
+    ``` 
 
 ### **2. Environment Variables**
 
