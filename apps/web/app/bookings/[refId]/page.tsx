@@ -257,9 +257,13 @@ export default function BookingStatusPage() {
             </div>
           ))}
         </div>
-        <div className="mt-8 text-center text-gray-500">
-          <RefreshCcw className="inline h-4 w-4 mr-2" />
-          Timeline updates automatically
+        <div className="p-6 md:p-8 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-center space-x-3 text-gray-500">
+            <RefreshCcw className="h-4 w-4 animate-spin" />
+            <span className="text-sm font-medium">
+              Timeline updates automatically
+            </span>
+          </div>
         </div>
       </div>
     </div>

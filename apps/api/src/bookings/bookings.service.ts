@@ -73,9 +73,6 @@ export class BookingService {
     return saved;
   }
 
-  /**
-   * Helper: get last event for a booking (or null)
-   */
   private async getLastEvent(bookingId: number) {
     return this.eventRepo.findOne({
       where: { booking: { id: bookingId } },

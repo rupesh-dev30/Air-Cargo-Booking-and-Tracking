@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-100 to-gray-200 flex flex-col items-center justify-center p-4 md:p-8">
       {/* Hero Section */}
-      <div className="bg-white rounded-4xl shadow-2xl p-10 md:p-16 max-w-5xl w-full border border-gray-100 transform hover:scale-105 transition-transform duration-500">
+      <div className="bg-white rounded-4xl p-10 md:p-16 max-w-5xl w-full border border-gray-100 transform transition-transform duration-500">
         <div className="text-center mb-10">
           <Plane className="h-20 w-20 text-indigo-500 mx-auto mb-6 animate-bounce" />
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-4 tracking-tight">
