@@ -4,6 +4,11 @@ This project is a full-stack application designed to manage the booking and trac
 
 ---
 
+# DOCUMENTATION
+https://www.notion.so/Air-Cargo-Booking-Tracking-System-Documentation-250a3413cab280e1b928c37f96a1c075?source=copy_link
+
+---
+
 ## 🚀 Project Objective
 
 The primary goal is to build a system that allows users to create an air-cargo booking and track its status from the point of origin to its final destination.
