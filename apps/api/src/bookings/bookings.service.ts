@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,6 +11,8 @@ import { BookingEvent } from './entities/booking-event.entity';
 import { randomBytes } from 'crypto';
 import { Flight } from 'src/flights/entities/flight.entity';
 import { BookingLockService } from 'src/shared/booking-lock.service';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Injectable()
 export class BookingService {
@@ -21,26 +24,36 @@ export class BookingService {
     @InjectRepository(BookingEvent)
     private eventRepo: Repository<BookingEvent>,
     private lockService: BookingLockService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
   private generateRefId(): string {
     return 'BK-' + randomBytes(4).toString('hex').toUpperCase();
   }
 
-  /**
-   * Create a booking tied to a single flight.
-   * Booking + initial event are saved in a single transaction.
-   */
+  private async getLastEvent(bookingId: number) {
+    return this.eventRepo.findOne({
+      where: { booking: { id: bookingId } },
+      order: { created_at: 'DESC' },
+    });
+  }
+
   async createBooking(data: {
     flight_id: number;
     pieces: number;
     weight_kg: number;
   }) {
     const { flight_id, pieces, weight_kg } = data;
+    this.logger.info(
+      `Creating booking for flight ${flight_id}, pieces: ${pieces}, weight: ${weight_kg}kg`,
+    );
 
     // 1. Find flight
     const flight = await this.flightRepo.findOne({ where: { id: flight_id } });
-    if (!flight) throw new NotFoundException('Flight not found');
+    if (!flight) {
+      this.logger.warn(`Flight ${flight_id} not found`);
+      throw new NotFoundException('Flight not found');
+    }
 
     // 2. Build booking (not yet saved)
     const booking = this.bookingRepo.create({
@@ -65,32 +78,33 @@ export class BookingService {
           location: flight.origin,
         });
         await manager.save(BookingEvent, event);
-
         return savedBooking;
       },
     );
 
+    this.logger.info(
+      `Booking ${saved.ref_id} created successfully from ${flight.origin} to ${flight.destination}`,
+    );
     return saved;
   }
 
-  private async getLastEvent(bookingId: number) {
-    return this.eventRepo.findOne({
-      where: { booking: { id: bookingId } },
-      order: { created_at: 'DESC' },
-    });
-  }
-
   async departBooking(refId: string, location: string) {
+    this.logger.info(`Attempting to depart booking ${refId} from ${location}`);
     const lock = await this.lockService.acquireLock(refId);
-    if (!lock)
+    if (!lock) {
+      this.logger.warn(`Failed to acquire lock for booking ${refId}`);
       throw new BadRequestException('Booking is being updated, try again');
+    }
 
     try {
       const booking = await this.bookingRepo.findOne({
         where: { ref_id: refId },
         relations: ['flight', 'events'],
       });
-      if (!booking) throw new NotFoundException('Booking not found');
+      if (!booking) {
+        this.logger.warn(`Booking ${refId} not found`);
+        throw new NotFoundException('Booking not found');
+      }
 
       // enforce allowed transition
       if (booking.status !== BookingStatus.BOOKED) {
@@ -119,6 +133,9 @@ export class BookingService {
       });
       await this.eventRepo.save(event);
 
+      this.logger.info(
+        `Booking ${refId} departed successfully from ${location}`,
+      );
       return booking;
     } finally {
       await this.lockService.releaseLock(refId);
@@ -126,6 +143,9 @@ export class BookingService {
   }
 
   async arriveBooking(refId: string, location: string) {
+    this.logger.info(
+      `Attempting to mark booking ${refId} as arrived at ${location}`,
+    );
     const lock = await this.lockService.acquireLock(refId);
     if (!lock)
       throw new BadRequestException('Booking is being updated, try again');
@@ -135,7 +155,10 @@ export class BookingService {
         where: { ref_id: refId },
         relations: ['flight', 'events'],
       });
-      if (!booking) throw new NotFoundException('Booking not found');
+      if (!booking) {
+        this.logger.warn(`Booking ${refId} not found`);
+        throw new NotFoundException('Booking not found');
+      }
 
       // enforce allowed transition
       if (booking.status !== BookingStatus.DEPARTED) {
@@ -163,6 +186,7 @@ export class BookingService {
         location,
       });
       await this.eventRepo.save(event);
+      this.logger.info(`Booking ${refId} arrived successfully at ${location}`);
 
       return booking;
     } finally {
@@ -171,6 +195,7 @@ export class BookingService {
   }
 
   async cancelBooking(refId: string) {
+    this.logger.info(`Attempting to cancel booking ${refId}`);
     const lock = await this.lockService.acquireLock(refId);
     if (!lock)
       throw new BadRequestException('Booking is being updated, try again');
@@ -180,7 +205,10 @@ export class BookingService {
         where: { ref_id: refId },
         relations: ['flight', 'events'],
       });
-      if (!booking) throw new NotFoundException('Booking not found');
+      if (!booking) {
+        this.logger.warn(`Booking ${refId} not found`);
+        throw new NotFoundException('Booking not found');
+      }
 
       if (booking.status === BookingStatus.CANCELLED) {
         throw new BadRequestException('Booking is already canceled');
@@ -199,6 +227,7 @@ export class BookingService {
         location: booking.origin,
       });
       await this.eventRepo.save(event);
+      this.logger.info(`Booking ${refId} cancelled successfully`);
 
       return booking;
     } finally {
@@ -207,15 +236,20 @@ export class BookingService {
   }
 
   async getBookingHistory(refId: string) {
+    this.logger.info(`Fetching booking history for ${refId}`);
     const booking = await this.bookingRepo.findOne({
       where: { ref_id: refId },
       relations: ['flight', 'events', 'events.flight'],
     });
-    if (!booking) throw new NotFoundException('Booking not found');
+    if (!booking) {
+      this.logger.warn(`Booking ${refId} not found`);
+      throw new NotFoundException('Booking not found');
+    }
 
     booking.events = (booking.events || []).sort(
       (a, b) => a.created_at.getTime() - b.created_at.getTime(),
     );
+    this.logger.info(`Booking history fetched successfully for ${refId}`);
 
     return booking;
   }

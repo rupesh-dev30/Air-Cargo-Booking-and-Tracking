@@ -1,13 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Flight } from './entities/flight.entity';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Injectable()
 export class FlightsService {
   constructor(
     @InjectRepository(Flight)
     private readonly flightRepo: Repository<Flight>,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
   private getDayBounds(date: Date) {
@@ -25,14 +28,23 @@ export class FlightsService {
     destination: string,
     departureDate: Date,
   ): Promise<Flight[]> {
+    this.logger.info(
+      `Searching direct flights from ${origin} to ${destination} on ${departureDate.toDateString()}`,
+    );
     const { start, end } = this.getDayBounds(departureDate);
-    return this.flightRepo.find({
+    const flights = await this.flightRepo.find({
       where: {
         origin,
         destination,
         departure_datetime: Between(start, end),
       },
     });
+
+    this.logger.info(
+      `Found ${flights.length} direct flights from ${origin} to ${destination}`,
+    );
+
+    return flights;
   }
 
   async getTransitFlights(
@@ -40,6 +52,9 @@ export class FlightsService {
     destination: string,
     departureDate: Date,
   ): Promise<Flight[][]> {
+    this.logger.info(
+      `Searching transit flights from ${origin} to ${destination} on ${departureDate.toDateString()}`,
+    );
     const { start, end } = this.getDayBounds(departureDate);
 
     // First hop: origin → transit city
@@ -70,11 +85,16 @@ export class FlightsService {
         routes.push([f1, f2]);
       }
     }
-
+    this.logger.info(
+      `Found ${routes.length} transit routes from ${origin} to ${destination}`,
+    );
     return routes;
   }
 
   async getRoute(origin: string, destination: string, date: Date) {
+    this.logger.info(
+      `Fetching route from ${origin} to ${destination} on ${date.toDateString()}`,
+    );
     const directFlights = await this.findDirectFlights(
       origin,
       destination,
@@ -86,9 +106,15 @@ export class FlightsService {
       date,
     );
 
-    return {
+    const route = {
       direct: directFlights,
       transit: transitRoutes.length > 0 ? transitRoutes[0] : null,
     };
+
+    this.logger.info(
+      `Route fetch completed: ${directFlights.length} direct, ${transitRoutes.length} transit`,
+    );
+
+    return route;
   }
 }

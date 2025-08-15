@@ -1,9 +1,20 @@
 import { DataSource } from 'typeorm';
 import { Flight } from './flights/entities/flight.entity';
 
-const cities = ['DEL','BOM','BLR','MAA','CCU','HYD','AMD','IXC','PNQ','CCJ']; // Indian cities only
+const cities = [
+  'DEL',
+  'BOM',
+  'BLR',
+  'MAA',
+  'CCU',
+  'HYD',
+  'AMD',
+  'IXC',
+  'PNQ',
+  'CCJ',
+];
 
-const airlines = ['IndiGo','Air India','SpiceJet','Vistara'];
+const airlines = ['IndiGo', 'Air India', 'SpiceJet', 'Vistara'];
 
 export async function seedFlights(dataSource: DataSource) {
   const flightRepo = dataSource.getRepository(Flight);
@@ -34,8 +45,7 @@ export async function seedFlights(dataSource: DataSource) {
     );
 
     const arr_time = new Date(
-      dep_time.getTime() +
-        (1 + Math.floor(Math.random() * 9)) * 60 * 60 * 1000, // arrival 1-10 hours later
+      dep_time.getTime() + (1 + Math.floor(Math.random() * 9)) * 60 * 60 * 1000, // arrival 1-10 hours later
     );
 
     try {
