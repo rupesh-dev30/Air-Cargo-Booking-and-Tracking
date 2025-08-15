@@ -1,40 +1,9 @@
 import { DataSource } from 'typeorm';
 import { Flight } from './flights/entities/flight.entity';
 
-const cities = [
-  'DEL',
-  'BOM',
-  'BLR',
-  'MAA',
-  'CCU',
-  'HYD',
-  'AMD',
-  'DXB',
-  'JFK',
-  'LHR',
-  'SIN',
-  'NRT',
-  'FRA',
-  'HKG',
-  'SFO',
-  'DOH',
-  'CDG',
-  'LAX',
-  'ZRH',
-  'IXC',
-  'PNQ',
-  'CCJ',
-];
+const cities = ['DEL','BOM','BLR','MAA','CCU','HYD','AMD','IXC','PNQ','CCJ']; // Indian cities only
 
-const airlines = [
-  'IndiGo',
-  'Air India',
-  'SpiceJet',
-  'Vistara',
-  'Emirates',
-  'Lufthansa',
-  'Singapore Airlines',
-];
+const airlines = ['IndiGo','Air India','SpiceJet','Vistara'];
 
 export async function seedFlights(dataSource: DataSource) {
   const flightRepo = dataSource.getRepository(Flight);
@@ -56,7 +25,7 @@ export async function seedFlights(dataSource: DataSource) {
     const flight_num = `${airline}-${100 + (i % 900)}-${i}`;
 
     const dep_time = new Date(
-      Date.now() + Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000),
+      Date.now() + Math.floor(Math.random() * 10 * 24 * 60 * 60 * 1000), // next 10 days
     );
     dep_time.setHours(
       Math.floor(Math.random() * 24),
@@ -66,7 +35,7 @@ export async function seedFlights(dataSource: DataSource) {
 
     const arr_time = new Date(
       dep_time.getTime() +
-        (1 + Math.floor(Math.random() * 11)) * 60 * 60 * 1000,
+        (1 + Math.floor(Math.random() * 9)) * 60 * 60 * 1000, // arrival 1-10 hours later
     );
 
     try {
@@ -84,5 +53,5 @@ export async function seedFlights(dataSource: DataSource) {
     }
   }
 
-  console.log('Flight seeding completed ✅');
+  console.log('Indian flight seeding completed ✅');
 }
