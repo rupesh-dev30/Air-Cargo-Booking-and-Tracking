@@ -6,9 +6,11 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   CreateDateColumn,
+  Index,
 } from 'typeorm';
 
 @Entity()
+@Index('IDX_BOOKINGEVENT_BOOKING_CREATED', ['booking', 'created_at'])
 export class BookingEvent {
   @PrimaryGeneratedColumn()
   id: number;
@@ -22,7 +24,11 @@ export class BookingEvent {
   @Column({ nullable: true })
   location: string;
 
-  @ManyToOne(() => Flight, { eager: true, nullable: true })
+  @ManyToOne(() => Flight, {
+    eager: true,
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   flight: Flight;
 
   @CreateDateColumn()

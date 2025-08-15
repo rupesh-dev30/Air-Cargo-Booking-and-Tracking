@@ -1,7 +1,18 @@
 import { Booking } from 'src/bookings/entities/booking.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
+@Index('IDX_FLIGHT_ROUTE_DATE', ['origin', 'destination', 'departure_datetime'])
+@Index('IDX_FLIGHT_DEPARTURE_DATE', ['departure_datetime'])
+@Index('IDX_FLIGHT_UNIQUE', ['flight_number', 'departure_datetime'], {
+  unique: true,
+})
 export class Flight {
   @PrimaryGeneratedColumn()
   id: number;

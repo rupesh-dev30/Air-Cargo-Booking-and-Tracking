@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -23,6 +24,7 @@ export class Booking {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index('IDX_BOOKING_REFID')
   @Column({ unique: true })
   ref_id: string;
 

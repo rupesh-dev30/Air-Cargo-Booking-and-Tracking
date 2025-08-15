@@ -7,9 +7,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Booking, BookingStatus } from './entities/booking.entity';
 import { Repository } from 'typeorm';
 import { BookingEvent } from './entities/booking-event.entity';
-import { BookingLockService } from 'src/shared/booking-lock.service';
 import { randomBytes } from 'crypto';
 import { Flight } from 'src/flights/entities/flight.entity';
+import { BookingLockService } from 'src/shared/booking-lock.service';
 
 @Injectable()
 export class BookingService {
