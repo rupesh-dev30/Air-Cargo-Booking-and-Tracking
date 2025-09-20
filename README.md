@@ -167,22 +167,6 @@ To run both the API and Web UI, you can use a unified command if your project us
 
 ---
 
-## ✅ Evaluation Criteria
-
-The final solution will be evaluated based on the following:
-
-1.  **Database Design**: Choice of database and effective data modeling.
-2.  **Code Structure**: Clean, modular, and maintainable code.
-3.  **Performance**: Optimized for high-throughput and low-latency operations.
-4.  **Indexing**: Proper database indexing for efficient queries.
-5.  **Caching**: Strategic use of caching to improve performance.
-6.  **Testing**: Comprehensive unit tests to ensure reliability.
-7.  **Monitoring**: Implementation of monitoring tools to track system health.
-8.  **UI/UX**: Clean, simple, and usable user interface.
-9.  **Documentation**: Clear and concise High-Level Design (HLD) and Low-Level Design (LLD) documentation.
-
----
-
 ## 📦 Final Deliverables
 
 The complete project will include:
